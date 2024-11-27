@@ -1,4 +1,4 @@
-chromosome_01
+chromosome_01:100000-500000
 chromosome_02
 chromosome_03
 chromosome_04
