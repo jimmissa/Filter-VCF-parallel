@@ -7,8 +7,12 @@ from multiprocessing import Pool
 
 def filter_vcf(out, vcf_path, snp = 0, biallelic = 0, indel = 0, DP = 0, GQ = 0, AD = 0,
                covg_file = "", frac_called = 0, quant=0.9, region = '', samples=''):
+    """
+    Default no filters applied.
+    Needs an "average_depth.txt" file in same dir which specifies average depth of each isolate in the vcf.
+    """
 
-    print("Initiating...")
+    print(f"Initiating for {region}.")
     vcf = VCF(vcf_path)
     
     sample_indices = []
@@ -33,7 +37,6 @@ def filter_vcf(out, vcf_path, snp = 0, biallelic = 0, indel = 0, DP = 0, GQ = 0,
     np_max = np_avgs + 4 * np.sqrt(np_avgs) # need to define whether or not coverage file is provided
     if sample_indices != []:
         np_max = np_max[np.array(sample_indices)]
-        print(f"Samples used:\n{samples}")
     
     # Filters
     def check_snp(row):
@@ -61,11 +64,31 @@ def filter_vcf(out, vcf_path, snp = 0, biallelic = 0, indel = 0, DP = 0, GQ = 0,
         start, end = 465219, 679919
         return row.POS < start or row.POS > end
 
+    # Assemble filters
+    condition_checks = []
+    if snp:
+        condition_checks.append(check_snp)
+    if biallelic:
+        condition_checks.append(check_biallelic)
+    if indel == 1:
+        condition_checks.append(check_indel)
+    elif indel == 2:
+        condition_checks.append(check_not_indel)
+    # if DP or GQ or AD or covg_file:
+    if GQ or DP or AD or covg_file:
+        condition_checks.append(num_that_pass_metrics)
+    if frac_called:
+        condition_checks.append(check_called_frac)
+    if region == 'chromosome_06':
+        condition_checks.append(check_mt_minus)
+    if len(condition_checks) == 0:
+        raise Exception("Please specify at least one filtering condition.")
+
     # Apply filters
     for row in vcf(region):
         if all(condition(row) for condition in condition_checks):
             w.write_record(row)
-    print(f"Done. Closing for {region}.")
+    print(f"Done for {region}. Closing this file.")
     w.close(), vcf.close()
 
 def make_header(VCF, out_name):
@@ -104,7 +127,7 @@ def parallelize_cyvcf2(arg_list: tuple, chromosomes: list, processes: int, out_n
         with Pool(processes) as p:
             p.starmap(filter_vcf, inputs)
     
-    # Use Python for sorting the chromosome files
+    # Sorting chromosome-specific VCF filenames
     chromosome_files = sorted([f"{temp_name}/chromosome_{i:02d}.vcf" for i in range(1, 18)])
     
     # Merge sorted VCFs into final VCF
@@ -145,20 +168,18 @@ def main():
     if args.biallelic:
         print("Must be biallelic")
     if args.indel == 1:
-        condition_checks.append(check_indel)
-        condition_printouts.append("Must be an indel")
+        print("Must be an indel")
     elif args.indel == 2:
-        condition_checks.append(check_not_indel)
-        condition_printouts.append("Must not be an indel")
+        print("Must not be an indel")
     if args.GQ or args.DP or args.AD or args.covg_file:
         print(f"Must have a DP of {str(args.DP)}, a GQ of {str(args.GQ)}, and an AD of {str(args.AD)}.")
     if args.covg_file:
         print("Must do the coverage thing.")
     if args.frac_called:
-        condition_printouts.append("Fraction of sites called must be " + str(frac_called))
+        print("Fraction of sites called must be " + str(args.frac_called))
     if args.samples:
         print(f"Running on the following samples: {args.samples}")
-    statement = [f"Running {args.processes} parallelizations.", "Parallelizing for each chromosome."][args.processes==-1]
+    statement = [f"Running {args.processes} parallelizations.", "Running one parallel process per chromosome."][args.processes==-1]
     print(statement)
 
     # Executing parallelize_cyvcf2
