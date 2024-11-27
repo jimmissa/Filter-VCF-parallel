@@ -7,10 +7,6 @@ from multiprocessing import Pool
 
 def filter_vcf(out, vcf_path, snp = 0, biallelic = 0, indel = 0, DP = 0, GQ = 0, AD = 0,
                covg_file = "", frac_called = 0, quant=0.9, region = '', samples=''):
-    """
-    Default no filters applied.
-    Needs an "average_depth.txt" file in same dir which specifies average depth of each isolate in the vcf.
-    """
 
     print("Initiating...")
     vcf = VCF(vcf_path)
