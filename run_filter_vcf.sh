@@ -10,6 +10,7 @@ DP=3
 GQ=20
 AD=0
 COVG_FILE="average_depth_new.txt"
+# If you dont want to use a coverage file, leave COVG_FILE as an empty string: COVG_FILE=""
 FRAC_CALLED=0.5
 QUANT=0.9
 CHROMOSOMES="chromosomes.txt"
@@ -22,14 +23,19 @@ if [[ ! -f "$VCF_PATH" ]]; then
     exit 1
 fi
 
-if [[ ! -f "$COVG_FILE" ]]; then
-    echo "Error: Coverage file not found at $COVG_FILE."
-    exit 1
-fi
-
 if [[ ! -f "$CHROMOSOMES" ]]; then
     echo "Error: Chromosomes file not found at $CHROMOSOMES."
     exit 1
+fi
+
+# Check optional coverage file
+COVG_ARG=""
+if [[ -n "$COVG_FILE" ]]; then
+    if [[ ! -f "$COVG_FILE" ]]; then
+        echo "Error: Coverage file not found at $COVG_FILE."
+        exit 1
+    fi
+    COVG_ARG="--covg_file $COVG_FILE"
 fi
 
 # Execute Python script
