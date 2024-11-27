@@ -88,7 +88,7 @@ def filter_vcf(out, vcf_path, snp = 0, biallelic = 0, indel = 0, DP = 0, GQ = 0,
     for row in vcf(region):
         if all(condition(row) for condition in condition_checks):
             w.write_record(row)
-    print(f"Done for {region}. Closing this file.")
+    print(f"Done for {region}.")
     w.close(), vcf.close()
 
 def make_header(VCF, out_name):
