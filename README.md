@@ -20,7 +20,9 @@ python filter_vcf.py \
 
 A second way to run it is also made available via the run_filter_vcf.sh file. This file already sets up all the values for the input variables you may want, and then runs the Python program. You just need to call it from the command-line after setting it up: 
 
-bash run_filter_vcf.sh 
+```
+bash run_filter_vcf.sh
+```
 
 All you need to do is edit the values of the input variables. If you are running from the command-line, you can exclude any input argument you do not want. If you are running directly running the run_filter_vcf.sh file, then just leave the filters you don't want to use as null values (0s for numerical filters like GQ, or an empty string if you don't want to specify a coverage file).
 
