@@ -2,7 +2,21 @@ This folder contains a command-line Pythonic program to filter a VCF file, using
 
 The program is contained in filter_vcf.py and can be run from the command-line as follows:
 
-python filter_vcf.py --out filtered.vcf --vcf-path path/to/file.vcf --snp 1 --biallelic 1 --indel 2 --DP 3 --GQ 30 --AD 5 --covg_file average_depth_new.txt --frac_called 0.5 --quant 0.9 --chromosomes chromosomes.txt --samples ISOLATE1 ISOLATE2 ISOLATE3 --processes -1
+```
+python filter_vcf.py \
+--out filtered.vcf \
+--vcf-path path/to/file.vcf \
+--snp 1 \
+--biallelic 1 \
+--indel 2 \
+--DP 3 --GQ 30 --AD 5 \
+--covg_file average_depth_new.txt \
+--frac_called 0.5 \
+--quant 0.9 \
+--chromosomes chromosomes.txt \
+--samples ISOLATE1 ISOLATE2 ISOLATE3 \
+--processes -1
+```
 
 A second way to run it is also made available via the run_filter_vcf.sh file. This file already sets up all the values for the input variables you may want, and then runs the Python program. You just need to call it from the command-line after setting it up: 
 
